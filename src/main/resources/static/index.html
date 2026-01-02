@@ -9,53 +9,55 @@
 <button id="start">Начать передачу аудио</button>
 
 <script>
-const socket = new WebSocket("ws://localhost:8080/audio");
-socket.binaryType = "arraybuffer";
+    const host = window.location.host; // audio-app-3-b3x1.onrender.com
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${protocol}://${host}/audio`);
+    socket.binaryType = "arraybuffer";
 
-socket.onopen = () => console.log("Соединение открыто");
-socket.onclose = () => console.log("Соединение закрыто");
+    socket.onopen = () => console.log("Соединение открыто");
+    socket.onclose = () => console.log("Соединение закрыто");
 
-// Воспроизведение аудио
-socket.onmessage = (event) => {
-    const arrayBuffer = event.data;
-    const view = new DataView(arrayBuffer);
-    const float32Array = new Float32Array(view.byteLength / 2);
+    // Воспроизведение аудио
+    socket.onmessage = (event) => {
+        const arrayBuffer = event.data;
+        const view = new DataView(arrayBuffer);
+        const float32Array = new Float32Array(view.byteLength / 2);
 
-    for (let i = 0; i < float32Array.length; i++) {
-        float32Array[i] = view.getInt16(i * 2, true) / 32768; // нормализуем
-    }
-
-    const audioContext = new AudioContext();
-    const buffer = audioContext.createBuffer(1, float32Array.length, audioContext.sampleRate);
-    buffer.copyToChannel(float32Array, 0);
-
-    const source = audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.connect(audioContext.destination);
-    source.start();
-};
-
-// Захват микрофона и отправка аудио
-document.getElementById("start").onclick = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const context = new AudioContext();
-    const source = context.createMediaStreamSource(stream);
-    const processor = context.createScriptProcessor(4096, 1, 1);
-
-    source.connect(processor);
-    processor.connect(context.destination);
-
-    processor.onaudioprocess = e => {
-        const input = e.inputBuffer.getChannelData(0);
-        const buffer = new ArrayBuffer(input.length * 2);
-        const view = new DataView(buffer);
-        for (let i = 0; i < input.length; i++) {
-            let s = Math.max(-1, Math.min(1, input[i]));
-            view.setInt16(i*2, s < 0 ? s*0x8000 : s*0x7FFF, true);
+        for (let i = 0; i < float32Array.length; i++) {
+            float32Array[i] = view.getInt16(i * 2, true) / 32768; // нормализуем
         }
-        socket.send(buffer);
+
+        const audioContext = new AudioContext();
+        const buffer = audioContext.createBuffer(1, float32Array.length, audioContext.sampleRate);
+        buffer.copyToChannel(float32Array, 0);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        source.start();
     };
-};
+
+    // Захват микрофона и отправка аудио
+    document.getElementById("start").onclick = async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const context = new AudioContext();
+        const source = context.createMediaStreamSource(stream);
+        const processor = context.createScriptProcessor(4096, 1, 1);
+
+        source.connect(processor);
+        processor.connect(context.destination);
+
+        processor.onaudioprocess = e => {
+            const input = e.inputBuffer.getChannelData(0);
+            const buffer = new ArrayBuffer(input.length * 2);
+            const view = new DataView(buffer);
+            for (let i = 0; i < input.length; i++) {
+                let s = Math.max(-1, Math.min(1, input[i]));
+                view.setInt16(i*2, s < 0 ? s*0x8000 : s*0x7FFF, true);
+            }
+            socket.send(buffer);
+        };
+    };
 </script>
 </body>
 </html>
