@@ -3,10 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>WebSocket Audio Chat</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* вертикальное центрирование */
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 40px;
+        }
+        #callBtn {
+            font-size: 2.5rem; /* увеличиваем текст кнопки */
+            padding: 100px 60px; /* увеличиваем размер кнопки */
+            cursor: pointer;
+            border: none;
+            border-radius: 15px;
+            background-color: #4CAF50;
+            color: white;
+            transition: transform 0.2s;
+        }
+        #callBtn:hover {
+            transform: scale(1.05);
+            background-color: #45a049;
+        }
+        .calling {
+          background-color: red !important;
+        }
+    </style>
 </head>
 <body>
 <h2>Простой аудио-чат (видео / голос)тттттттт</h2>
-<button id="start">Начать передачу аудио</button>
+<button id="callBtn">Начать передачу аудио</button>
 
 <script>
     const host = window.location.host; // audio-app-3-b3x1.onrender.com
@@ -38,7 +69,8 @@
     };
 
     // Захват микрофона и отправка аудио
-    document.getElementById("start").onclick = async () => {
+    document.getElementById("callBtn").onclick = async () => {
+        document.getElementById("callBtn").classList.add("calling");
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         const context = new AudioContext();
         const source = context.createMediaStreamSource(stream);
