@@ -17,4 +17,5 @@ COPY --from=build /app/target/*jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Используем переменную PORT Render, если она есть
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]
