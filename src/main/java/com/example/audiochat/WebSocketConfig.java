@@ -17,7 +17,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    // URL для WebSocket: ws://localhost:8080/audio
+    // URL  для WebSocket: ws://localhost:8080/audio
     registry.addHandler(audioHandler, "/audio").setAllowedOrigins("*");
   }
 }
