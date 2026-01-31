@@ -58,4 +58,4 @@ jobs:
             echo "🔄 Riavvio servizio systemd"
             sudo systemctl restart app3
 
-            echo "✅ Deploy completato"
+            echo "✅ Deploy completat"
