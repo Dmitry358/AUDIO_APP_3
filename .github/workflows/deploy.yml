@@ -30,7 +30,7 @@ jobs:
           path: target/*.jar
 
   deploy:
-    name: Deploy to server
+    name: Deploy to Server
     needs: build
     runs-on: ubuntu-latest
 
@@ -40,7 +40,17 @@ jobs:
         with:
           name: app3-jar
 
-      - name: Deploy JAR and restart service
+      - name: Copy JAR to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "*.jar"
+          target: "/home/deploy/deploy/app3"
+          strip_components: 0
+
+      - name: Restart service on server
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -48,14 +58,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-
-            echo "📁 Creo directory deploy"
-            mkdir -p ~/deploy/app3
-
-            echo "📦 Copio JAR"
-            cp *.jar ~/deploy/app3/app3.jar
-
+            echo "📦 Rinomino JAR come app3.jar"
+            mv /home/deploy/deploy/app3/*.jar /home/deploy/deploy/app3/app3.jar
             echo "🔄 Riavvio servizio systemd"
             sudo systemctl restart app3
-
-            echo "✅ Deploy completat"
+            echo "✅ Deploy completato"
