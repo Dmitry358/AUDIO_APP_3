@@ -62,4 +62,4 @@ jobs:
             mv /home/deploy/deploy/app3/*.jar /home/deploy/deploy/app3/app3.jar
             echo "🔄 Riavvio servizio systemd"
             sudo systemctl restart app3
-            echo "✅ Deploy completato"
+            echo "✅ Deploy completato!!"
