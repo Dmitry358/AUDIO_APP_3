@@ -83,4 +83,4 @@ jobs:
             echo "🔄 Reload nginx"
             sudo systemctl reload nginx
 
-            echo "✅ Deploy completato!"
+            echo "✅ Deploy completato!!"
