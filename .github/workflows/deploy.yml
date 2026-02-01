@@ -29,39 +29,39 @@ jobs:
           name: app3-jar
           path: target/*.jar
 
-deploy:
-  name: Deploy to Server
-  needs: build
-  runs-on: ubuntu-latest
+  deploy:
+    name: Deploy to Server
+    needs: build
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Download JAR artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: app3-jar
+    steps:
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app3-jar
 
-    - name: Copy JAR to server
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        source: "*.jar"
-        target: "/home/miti/my_apps/app3"
-        strip_components: 0
+      - name: Copy JAR to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "*.jar"
+          target: "/home/miti/my_apps/app3"
+          strip_components: 0
 
-    - name: Restart app on server
-      uses: appleboy/ssh-action@v0.1.8
-      with:
-        host: ${{ secrets.SERVER_IP }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          set -e
-          echo "📦 Rinomino JAR come app3.jar"
-          mv /home/miti/my_apps/app3/*.jar /home/miti/my_apps/app3/app3.jar
-          echo "🔄 Riavvio app"
-          pkill -f app3.jar || true
-          nohup java -jar /home/miti/my_apps/app3/app3.jar > /home/miti/my_apps/app3/app3.log 2>&1 &
-          echo "✅ Deploy completato!!"
+      - name: Restart app on server
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            echo "📦 Rinomino JAR come app3.jar"
+            mv /home/miti/my_apps/app3/*.jar /home/miti/my_apps/app3/app3.jar
+            echo "🔄 Riavvio app"
+            pkill -f app3.jar || true
+            nohup java -jar /home/miti/my_apps/app3/app3.jar > /home/miti/my_apps/app3/app3.log 2>&1 &
+            echo "✅ Deploy completato!!"
 
