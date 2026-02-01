@@ -50,7 +50,7 @@ jobs:
           target: "/home/miti/my_apps/app3"
           strip_components: 0
 
-      - name: Restart app3 and reload nginx
+      - name: Stop app3 if running
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -58,16 +58,36 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
-            echo "📦 Stop app3 if running"
-            pkill -f 'java -jar /home/miti/my_apps/app3/*.jar' || true
+            echo "📦 Stopping app3 if running"
+            pkill -f 'java -jar /home/miti/my_apps/app3/app3.jar' || true  # Stop any existing process
+            echo "✅ App3 stopped successfully!"
 
-            echo "📦 Start app3"
-            nohup java -jar /home/miti/my_apps/app3/*.jar > /home/miti/my_apps/app3/app3.log 2>&1 &
+      - name: Rename and start new app3
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            echo "📦 Renaming JAR and starting new app3"
+            mv /home/miti/my_apps/app3/*.jar /home/miti/my_apps/app3/app3.jar  # Rename to app3.jar
+            nohup java -jar /home/miti/my_apps/app3/app3.jar > /home/miti/my_apps/app3/app3.log 2>&1 &  # Start new app
+            echo "✅ App3 started successfully!"
 
-            echo "🔧 Test nginx config"
-            sudo nginx -t
+      - name: Test and reload nginx
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            echo "🔧 Testing nginx config"
+            sudo nginx -t  # Test nginx config
+            echo "🔄 Reloading nginx"
+            sudo systemctl reload nginx  # Reload nginx
+            echo "✅ Nginx reloaded successfully!"
 
-            echo "🔄 Reload nginx"
-            sudo systemctl reload nginx
-
-            echo "✅ Deploy completato!"
+      - name: Clean up
+        run: echo "Deploy completed successfully!"
