@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app3-jar
-          path: target/*.jar
+          path: target/audiochat-0.0.1-SNAPSHOT.jar  # Assicurati che il nome del JAR sia corretto
 
   deploy:
     name: Deploy to Server
@@ -46,8 +46,8 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "*.jar"
-          target: "/home/miti/my_apps/app3"
+          source: "audiochat-0.0.1-SNAPSHOT.jar"  # Nome del file JAR
+          target: "/home/miti/my_apps/app3/"
           strip_components: 0
 
       - name: Deploy & restart app3
@@ -60,7 +60,7 @@ jobs:
             set -e
 
             echo "📦 Stop app3 if running"
-            PID=$(ps aux | grep 'java -jar /home/miti/my_apps/app3/app3.jar' | grep -v grep | awk '{print $2}')
+            PID=$(ps aux | grep 'java -jar /home/miti/my_apps/app3/audiochat-0.0.1-SNAPSHOT.jar' | grep -v grep | awk '{print $2}')
             if [ -n "$PID" ]; then
               kill -9 $PID
               echo "✅ App3 stopped successfully!"
@@ -68,8 +68,11 @@ jobs:
               echo "📦 App3 is not running"
             fi
 
+            echo "📦 Create the app3 directory if it doesn't exist"
+            mkdir -p /home/miti/my_apps/app3
+
             echo "📦 Deploy new JAR"
-            mv /home/miti/my_apps/app3/*.jar /home/miti/my_apps/app3/app3.jar
+            mv /home/miti/my_apps/app3/audiochat-0.0.1-SNAPSHOT.jar /home/miti/my_apps/app3/app3.jar  # Rinomina il file JAR
 
             echo "📦 Start app3"
             nohup java -jar /home/miti/my_apps/app3/app3.jar > /home/miti/my_apps/app3/app3.log 2>&1 &
